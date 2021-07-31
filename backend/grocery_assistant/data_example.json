@@ -1,0 +1,79 @@
+[
+{
+    "Блок": "http://localhost/api/users/",
+    "Пользователи": [
+        {
+            "email": "vpupkin@yandex.ru",
+            "username": "vasya.pupkin",
+            "first_name": "Васяя",
+            "last_name": "Пупкин",
+            "password": "augashasocmscodvoddsivu"
+        },
+        {
+            "email": "voltvordol@yandex.ru",
+            "username": "vvoltvordol",
+            "first_name": "Володя",
+            "last_name": "Твёрдолобов",
+            "password": "augashasocmcdmcalllw1"
+        }
+    ]
+},
+
+{
+    "Блок": "http://localhost/api/recipes/",
+    "Рецепты": [
+        {
+            "ingredients": [
+                {
+                    "id": 1,
+                    "amount": 1
+                },
+                {
+                    "id": 2,
+                    "amount": 2
+                },
+                {
+                    "id": 3,
+                    "amount": 3
+                },
+                {
+                    "id": 4,
+                    "amount": 5
+                }
+            ],
+            "tags": [
+                1,
+                2
+            ],
+            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "name": "Борщ",
+            "text": "Готовить с любовью",
+            "cooking_time": 20
+        },
+        {
+            "ingredients": [
+                {
+                    "id": 6,
+                    "amount": 10
+                },
+                {
+                    "id": 7,
+                    "amount": 2
+                },
+                {
+                    "id": 8,
+                    "amount": 20
+                }
+            ],
+            "tags": [
+                4
+            ],
+            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+            "name": "Яичница",
+            "text": "Нужна сковорода.",
+            "cooking_time": 5
+        }
+    ]
+}
+
+]

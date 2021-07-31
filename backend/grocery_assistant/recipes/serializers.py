@@ -1,10 +1,9 @@
-from django.db.models import fields
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from .models import Recipe, RecipeIngredient, Tag, Ingredient
-from drf_extra_fields.fields import Base64ImageField
-
 from users.serializers import CustomUserSerializer
+
+from .models import Ingredient, Recipe, RecipeIngredient, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -30,12 +29,16 @@ class IngredientWithAmountSerializer(serializers.Serializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = IngredientWithAmountSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     image = Base64ImageField(use_url=True)
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'ingredients', 'name', 'image', 'text', 'cooking_time')
+        fields = (
+            'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time'
+        )
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -82,15 +85,17 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'id', 'tags', 'author', 'ingredients', 'is_favorited', 
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
     def get_ingredients(self, obj):
         res = []
-        
+
         for ingredient in obj.ingredients.all():
-            amount = get_object_or_404(RecipeIngredient, recipe=obj, ingredient=ingredient).amount
+            amount = get_object_or_404(
+                RecipeIngredient, recipe=obj, ingredient=ingredient
+            ).amount
             res.append({
                     'id': ingredient.id,
                     'name': ingredient.name,
@@ -99,7 +104,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
                 }
             )
         return res
-    
+
     def get_is_favorited(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:

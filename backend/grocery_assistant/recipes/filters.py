@@ -1,6 +1,7 @@
 import django_filters as filters
-from .models import Recipe
 from django_filters.widgets import BooleanWidget
+
+from .models import Recipe
 
 
 class RecipeFilter(filters.FilterSet):

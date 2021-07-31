@@ -1,19 +1,19 @@
-from rest_framework import viewsets, permissions, filters, status
-from rest_framework.decorators import action
-from .models import Favorite, Ingredient, Tag, Recipe, Purchase, RecipeIngredient
-from .serializers import (
-    IngredientSerializer, TagSerializer, RecipeCreateSerializer, RecipeGetSerializer
-)
-from .permissions import AuthorOrReadOnly
-from users.pagination import UsersPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import RecipeFilter
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from users.pagination import UsersPagination
 from users.serializers import SimpleRecipeSerializer
-from django.http import HttpResponse
 
+from .filters import RecipeFilter
+from .models import (Favorite, Ingredient, Purchase, Recipe, RecipeIngredient,
+                     Tag)
+from .permissions import AuthorOrReadOnly
+from .serializers import (IngredientSerializer, RecipeCreateSerializer,
+                          RecipeGetSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -44,7 +44,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if (
-            (self.action == 'favorite' or 'shopping_cart' or 'download_shopping_cart')
+            (
+                self.action == 'favorite' or 'shopping_cart' or
+                'download_shopping_cart'
+            )
             or self.request.method == 'POST'
         ):
             return (permissions.IsAuthenticated(),)
@@ -58,9 +61,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=self.kwargs['pk'])
         favorite = Favorite.objects.filter(user=cur_user, recipe=recipe)
 
-        create_wrong = self.request.method == 'GET' and favorite.exists()
-        delete_wrong = self.request.method == 'DELETE' and not favorite.exists()
-        
+        create_wrong = request.method == 'GET' and favorite.exists()
+        delete_wrong = request.method == 'DELETE' and not favorite.exists()
+
         if create_wrong or delete_wrong:
             if create_wrong:
                 error = 'Рецепт уже в списке избранных.'
@@ -74,13 +77,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
         if self.request.method == 'GET':
-            Favorite.objects.create(user= cur_user, recipe=recipe)
+            Favorite.objects.create(user=cur_user, recipe=recipe)
             serializer = SimpleRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     @action(['get', 'delete'], detail=True)
     def shopping_cart(self, request, *args, **kwargs):
@@ -88,9 +90,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=self.kwargs['pk'])
         purchase = Purchase.objects.filter(user=cur_user, recipe=recipe)
 
-        create_wrong = self.request.method == 'GET' and purchase.exists()
-        delete_wrong = self.request.method == 'DELETE' and not purchase.exists()
-        
+        create_wrong = request.method == 'GET' and purchase.exists()
+        delete_wrong = request.method == 'DELETE' and not purchase.exists()
+
         if create_wrong or delete_wrong:
             if create_wrong:
                 error = 'Рецепт уже в списке покупок.'
@@ -104,7 +106,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
         if self.request.method == 'GET':
-            Purchase.objects.create(user= cur_user, recipe=recipe)
+            Purchase.objects.create(user=cur_user, recipe=recipe)
             serializer = SimpleRecipeSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
@@ -120,10 +122,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = {}
         for recipe in recipes:
             for ingredient in recipe.ingredients.all():
-                recingr = get_object_or_404(
+                amount = get_object_or_404(
                     RecipeIngredient, recipe=recipe, ingredient=ingredient
-                )
-                amount = recingr.amount
+                ).amount
 
                 if ingredient.name in ingredients:
                     ingredients[ingredient.name]['amount'] += amount
@@ -132,7 +133,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         'amount': amount,
                         'measurement_unit': ingredient.measurement_unit
                     }
-        
+
         content = ''
         for name, info in ingredients.items():
             m_u = info['measurement_unit']

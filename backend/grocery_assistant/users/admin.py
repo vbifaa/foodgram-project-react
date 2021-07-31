@@ -1,5 +1,7 @@
-from .models import User, Follow
 from django.contrib import admin
+
+from .models import Follow, User
+
 
 class UsserAdmin(admin.ModelAdmin):
     list_display = (

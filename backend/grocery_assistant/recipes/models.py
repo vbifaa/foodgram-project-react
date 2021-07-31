@@ -38,7 +38,10 @@ class Recipe(models.Model):
 
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, blank=False, related_name='amounts'
+        Ingredient,
+        on_delete=models.CASCADE,
+        blank=False,
+        related_name='amounts'
     )
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, blank=False
@@ -57,7 +60,7 @@ class Favorite(models.Model):
         related_name='fan'
     )
     recipe = models.ForeignKey(
-        Recipe, 
+        Recipe,
         on_delete=models.CASCADE,
         blank=False,
         related_name='favorite_recipe'
@@ -75,7 +78,7 @@ class Purchase(models.Model):
         related_name='customer'
     )
     recipe = models.ForeignKey(
-        Recipe, 
+        Recipe,
         on_delete=models.CASCADE,
         blank=False,
         related_name='shopping_cart'

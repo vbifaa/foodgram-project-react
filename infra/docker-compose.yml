@@ -1,12 +1,43 @@
 version: '3.3'
+
+volumes: 
+  postgres_data:
+  static_value:
+  media_value:
+  result_build:
+
 services:
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+  db:
+    image: postgres:12.4
     volumes:
-      - ../frontend/:/app/result_build/
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ../backend/grocery_assistant/.env
+
+  backend:
+    build:
+      context: ../backend/grocery_assistant
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - static_value:/code/static/
+      - media_value:/code/media/
+    depends_on:
+      - db
+    env_file: 
+      - ../backend/grocery_assistant/.env
+
+  frontend:
+  #   build:
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../frontend/:/app/result_build/
+    image: vbifaa/frontend:v1
+    volumes:
+      - result_build:/build
+
   nginx:
     image: nginx:1.19.3
     ports:
@@ -16,3 +47,7 @@ services:
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
+    depends_on:
+      - backend

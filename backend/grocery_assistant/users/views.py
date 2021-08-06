@@ -28,7 +28,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(['get'], detail=False)
     def subscriptions(self, request, *args, **kwargs):
-        following = User.objects.filter(following__user=request.user)
+        following = self.get_queryset().filter(following__user=request.user)
         serializer = FollowingUsersSerializer(
             following, context={'request': request}, many=True
         )
@@ -38,34 +38,50 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, *args, **kwargs):
         cur_user = get_object_or_404(User, email=self.request.user)
         author = get_object_or_404(User, id=self.kwargs['id'])
-        follow = Follow.objects.filter(user=cur_user, author=author)
+        follow = author.following.filter(user=cur_user)
 
-        create_wrong = request.method == 'GET' and follow.exists()
-        delete_wrong = request.method == 'DELETE' and not follow.exists()
+        if request.method == 'DELETE':
+            return self.delete_follow(
+                author=author, user=cur_user, follow=follow
+            )
+        return self.create_follow(
+            author=author, user=cur_user, follow=follow, request=request
+        )
 
-        if author == cur_user or create_wrong or delete_wrong:
-            if author == cur_user:
-                if self.request.method == 'GET':
-                    error = 'Нельзя подписываться на самого себя.'
-                else:
-                    error = 'Нельзя отписываться от самого себя.'
-            elif create_wrong:
-                error = 'Вы уже подписаны на этого пользователя.'
-            else:
-                error = 'Вы не подписаны на этого пользователя.'
-            return Response(
-                {
-                    'errors': error
-                },
+    def create_follow(self, author, user, follow, request):
+        if author == user or follow.exists():
+            return self.bad_400_status_to_follow(
+                author_equals_user=(author == user),
+                error_author_eq_user='Нельзя подписываться на самого себя.',
+                error_otherwise='Вы уже подписаны на этого пользователя.'
+            )
+
+        Follow.objects.create(author=author, user=user)
+        serializer = FollowingUsersSerializer(
+            author, context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_follow(self, author, user, follow):
+        if author == user or not follow.exists():
+            return self.bad_400_status_to_follow(
+                author_equals_user=(author == user),
+                error_author_eq_user='Нельзя отписываться от самого себя.',
+                error_otherwise='Вы не подписаны на этого пользователя.'
+            )
+
+        follow.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def bad_400_status_to_follow(
+        self, author_equals_user, error_author_eq_user, error_otherwise
+    ):
+        if author_equals_user:
+            error_msg = error_author_eq_user
+        else:
+            error_msg = error_otherwise
+
+        return Response(
+                {'errors': error_msg},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        if self.request.method == 'GET':
-            Follow.objects.create(author=author, user=cur_user)
-            serializer = FollowingUsersSerializer(
-                author, context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            follow.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)

@@ -13,13 +13,20 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+class IngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+
+
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk', 'author', 'name', 'image', 'text', 'cooking_time'
     )
     filter_horizontal = ('ingredients', 'tags',)
     search_fields = ('name',)
-    list_filter = ('author', 'ingredients', 'tags',)
+    list_filter = ('author', 'tags',)
+    inlines = [
+        IngredientInline,
+    ]
 
 
 class RecipeIngredientAdmin(admin.ModelAdmin):

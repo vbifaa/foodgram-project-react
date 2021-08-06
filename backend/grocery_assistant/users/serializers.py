@@ -18,14 +18,12 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        if user.is_anonymous:
-            return False
-        return obj.following.filter(user=user).exists()
+        return (
+            not user.is_anonymous and obj.following.filter(user=user).exists()
+        )
 
     def to_internal_value(self, data):
-        if isinstance(data, int):
-            return User.objects.get(id=data)
-        return super().to_internal_value(data)
+        return User.objects.get(id=data)
 
 
 class SimpleRecipeSerializer(serializers.ModelSerializer):
@@ -49,10 +47,9 @@ class FollowingUsersSerializer(CustomUserSerializer):
 
     def get_recipes(self, obj):
         limit = self.context['request'].query_params.get('recipes_limit', None)
-        if limit is None:
-            recipes = obj.recipes.all()
-        else:
-            recipes = obj.recipes.all()[:int(limit)]
+        recipes = obj.recipes.all()
+        if limit is not None:
+            recipes = recipes[:int(limit)]
         return SimpleRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):

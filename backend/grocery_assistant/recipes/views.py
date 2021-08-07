@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from users.pagination import UsersPagination
 from users.serializers import SimpleRecipeSerializer
 
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .models import Favorite, Ingredient, Purchase, Recipe, Tag
 from .permissions import AuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
@@ -22,8 +22,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.AllowAny,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):

@@ -10,8 +10,8 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField('Единицы измерения', max_length=200)
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
 
@@ -37,7 +37,7 @@ class Recipe(models.Model):
     image = models.ImageField("Фото блюда", upload_to='recipes')
     ingredients = models.ManyToManyField(
         Ingredient,
-        verbose_name='Ингридиент',
+        verbose_name='Ингредиент',
         related_name='recipes',
         through='RecipeIngredient'
     )
@@ -61,7 +61,7 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
-        verbose_name='Ингридиент',
+        verbose_name='Ингредиент',
         on_delete=models.CASCADE,
         related_name='amounts'
     )

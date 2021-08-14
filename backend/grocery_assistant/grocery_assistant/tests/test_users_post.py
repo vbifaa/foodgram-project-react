@@ -1,7 +1,7 @@
-from .data.set_data import SetDataClass, authentication
+from .data.set_data import SetAuthUserData, authentication
 
 
-class TestPostUsers(SetDataClass):
+class TestPostUsers(SetAuthUserData):
 
     def setUp(self):
         super().setUp()
@@ -34,7 +34,7 @@ class TestPostUsers(SetDataClass):
     def test_correct_auth(self):
         response = self.guest_client.post(
             '/api/auth/token/login/',
-            self.get_auth_data(self.auth_client_data)
+            self.auth_client_auth_data
         )
 
         self.assertEqual(response.status_code, 200)
@@ -55,7 +55,7 @@ class TestPostUsers(SetDataClass):
         )
 
     def test_correct_change_password(self):
-        authentication(self.auth_client, self.get_auth_data(self.auth_client_data))
+        authentication(self.auth_client, self.auth_client_auth_data)
 
         response = self.auth_client.post(
             '/api/users/set_password/',
@@ -69,7 +69,7 @@ class TestPostUsers(SetDataClass):
         )
 
     def test_wrong_password_change_password(self):
-        authentication(self.auth_client, self.get_auth_data(self.auth_client_data))
+        authentication(self.auth_client, self.auth_client_auth_data)
         self.auth_client_change_password_data['current_password'] = 'llgjbvdc2ss38ascs'
 
         response = self.auth_client.post(
@@ -88,7 +88,7 @@ class TestPostUsers(SetDataClass):
         self.assert_bad_request(response=response, status_code=401, schema_field='detail')
 
     def test_correct_logout(self):
-        authentication(self.auth_client, self.get_auth_data(self.auth_client_data))
+        authentication(self.auth_client, self.auth_client_auth_data)
 
         response_logout = self.auth_client.post('/api/auth/token/logout/')
         response_use_bad_token = self.auth_client.post(

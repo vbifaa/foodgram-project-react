@@ -7,12 +7,14 @@ def create_objects(creator, objects):
         objects[id]['id'] = id + 1
     return objects
 
+
 def tag_creator(object):
     Tag.objects.create(
         name=object['name'],
         color=object['color'],
         slug=object['slug']
     )
+
 
 def ingredient_creator(object):
     Ingredient.objects.create(

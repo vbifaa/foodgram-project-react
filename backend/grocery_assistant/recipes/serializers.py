@@ -37,7 +37,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'tags', 'ingredients', 'name', 'image', 'text', 'cooking_time'
+            'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
         )
 
     def create(self, validated_data):
@@ -49,6 +49,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         if 'recipe' in validated_data:
             recipe = validated_data.pop('recipe')
             Recipe.objects.filter(id=recipe.id).update(**validated_data)
+            recipe = Recipe.objects.get(id=recipe.id)
         else:
             recipe = Recipe.objects.create(**validated_data)
 

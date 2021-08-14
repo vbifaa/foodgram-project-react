@@ -90,3 +90,34 @@ class Data:
             'password': 'augashasocmcdmcalllw1'
         }
     ]
+    recipes: List[Dict[str, Any]] = [
+        {
+            'ingredients': [
+                {'id': 1, 'amount': 1},
+                {'id': 2, 'amount': 2},
+                {'id': 3, 'amount': 3},
+                {'id': 4, 'amount': 5},
+                {'id': 6, 'amount': 10},
+                {'id': 8, 'amount': 4}
+            ],
+            'tags': [2],
+            'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==',
+            'name': 'Борщ',
+            'text': 'Готовить с любовью',
+            'cooking_time': 20
+        },
+        {
+            "ingredients": [
+                {'id': 9,'amount': 80},
+                {'id': 6,'amount': 10},
+                {'id': 8,'amount': 3}
+                ],
+                'tags': [
+                    1
+                ],
+                'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==',
+                'name': 'Яичница',
+                'text': 'Нужна сковорода.',
+                'cooking_time': 5
+            }
+    ]

@@ -35,7 +35,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = UsersPagination
 
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
+    filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
 
     AUTHENTICATED_ACTIONS = [

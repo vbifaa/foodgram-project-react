@@ -70,7 +70,7 @@ class Data:
             'measurement_unit': 'шт'
         },
         {
-            'name': 'Мокровь',
+            'name': 'Морковь',
             'measurement_unit': 'г'
         },
     ]
@@ -100,7 +100,7 @@ class Data:
                 {'id': 6, 'amount': 10},
                 {'id': 8, 'amount': 4}
             ],
-            'tags': [2],
+            'tags': [2, 3],
             'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==',
             'name': 'Борщ',
             'text': 'Готовить с любовью',
@@ -112,9 +112,7 @@ class Data:
                 {'id': 6,'amount': 10},
                 {'id': 8,'amount': 3}
                 ],
-                'tags': [
-                    1
-                ],
+                'tags': [1],
                 'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==',
                 'name': 'Яичница',
                 'text': 'Нужна сковорода.',

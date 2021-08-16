@@ -1,6 +1,7 @@
+import copy
 from .data.set_data import SetAllRecipesData
+from recipes.models import Recipe
 
-#  Надо рефакторить и добавить тесты на фильтры
 
 class TestGetRecipe(SetAllRecipesData):
 
@@ -34,46 +35,41 @@ class TestGetRecipe(SetAllRecipesData):
             correct_data=self.recipes
         )
 
-    def test_get_with_params_limit_1_recipes(self):
-        response_first_page = self.guest_client.get('/api/recipes/?page=1&limit=1')
-        response_second_page = self.guest_client.get('/api/recipes/?page=2&limit=1')
+    def test_filter_recipes(self):
+        recipes = self.get_recipes_with_tags(Recipe.objects, ['soup'])
+        self.assert_filter_recipes('?soup', recipes)
 
-        for response in [response_first_page, response_second_page]:
-            self.assertIn('results', response.data)
-            
-        results = response_first_page.data.pop('results')
-        self.assert_correct_request(
-            response=response_first_page,
-            status_code=200,
-            correct_data={
-                'count': 2,
-                'next': 'http://testserver/api/recipes/?limit=1&page=2',
-                'previous': None
-            }
-        )
-        response_first_page.data = results
+        recipes = self.get_recipes_with_author(Recipe.objects, 1)
+        self.assert_filter_recipes('?author=1', recipes)
+
+        recipes = self.get_recipes_with_tags(recipes, ['lunch'])
+        self.assert_filter_recipes('?author=1&tags=lunch', recipes)
+
+    def get_recipes_with_tags(self, recipes, tags):
+        return recipes.filter(tags__slug__in=tags)
+
+    def get_recipes_with_author(self, recipes, author_id):
+        return recipes.filter(author=author_id)
+
+    def assert_filter_recipes(self, url, correct_queryset):
+        response_data = self.convert_recipes_queryset_to_dict(correct_queryset)
+
+        response = self.guest_client.get(f'/api/recipes/{url}')
+        print('<<<<<', response.data)
+
         self.assert_recipes_response(
-            response=response_first_page,
+            response=response,
             status_code=200,
-            correct_data=[self.recipes[0]]
+            correct_data=response_data
         )
 
-        results = response_second_page.data.pop('results')
-        self.assert_correct_request(
-            response=response_second_page,
-            status_code=200,
-            correct_data={
-                'count': 2,
-                'next': None,
-                'previous': 'http://testserver/api/recipes/?limit=1'
-            }
-        )
-        response_second_page.data = results
-        self.assert_recipes_response(
-            response=response_second_page,
-            status_code=200,
-            correct_data=[self.recipes[1]]
-        )
+    def convert_recipes_queryset_to_dict(self, recipes):
+        recipes_id = [recipe.id for recipe in recipes]
+        recipes_response_data = []
+        for recipe in self.recipes:
+            if recipe['id'] in recipes_id:
+                recipes_response_data.append(copy.deepcopy(recipe))
+        return recipes_response_data
 
     def test_get_recipe(self):
         self.assert_element_from_queryset_equal_url_response(

@@ -1,7 +1,7 @@
 import django_filters as filters
 from django_filters.widgets import BooleanWidget
 
-from .models import Recipe, Ingredient
+from .models import Recipe, Ingredient, Tag
 
 
 class IngredientFilter(filters.FilterSet):
@@ -25,8 +25,8 @@ class RecipeFilter(filters.FilterSet):
         field_name='is_in_shopping_cart',
         widget=BooleanWidget()
     )
-    author = filters.CharFilter(
-        field_name='author', lookup_expr='icontains'
+    author = filters.NumberFilter(
+        field_name='author'
     )
 
     class Meta:

@@ -6,27 +6,33 @@ from .models import Ingredient, Recipe, RecipeIngredient, Tag
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'measurement_unit')
     search_fields = ('name',)
+    list_display_links = ('name',)
 
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'color', 'slug')
     search_fields = ('name',)
+    list_display_links = ('name',)
 
 
 class IngredientInline(admin.TabularInline):
     model = RecipeIngredient
+    min_num = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'pk', 'author', 'name', 'image', 'text', 'cooking_time'
+        'pk', 'author', 'name', 'get_tags', 'image', 'text', 'cooking_time'
     )
-    filter_horizontal = ('ingredients', 'tags',)
+    list_display_links = ('name',)
     search_fields = ('name',)
     list_filter = ('author', 'tags',)
     inlines = [
-        IngredientInline,
+        IngredientInline
     ]
+
+    def get_tags(self, obj):
+        return "\n".join([tag.name for tag in obj.tags.all()])
 
 
 class RecipeIngredientAdmin(admin.ModelAdmin):

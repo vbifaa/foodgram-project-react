@@ -13,6 +13,7 @@ class UserAdmin(admin.ModelAdmin):
 
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('pk', 'author', 'user')
+    list_display_links = ('author', 'user',)
 
 
 admin.site.register(User, UserAdmin)

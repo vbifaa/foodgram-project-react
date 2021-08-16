@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.expressions import Exists, OuterRef
+from django.db.models import BooleanField, Value
 
 User = get_user_model()
 
@@ -14,6 +16,9 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name
+
 
 class Tag(models.Model):
     name = models.CharField('Название', max_length=200, unique=True)
@@ -24,6 +29,39 @@ class Tag(models.Model):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class RecipeQuerySet(models.QuerySet):
+    def annotate_flags(self, user):
+        if user.is_anonymous:
+            return Recipe.objects.annotate(
+                is_favorited=Value(False, output_field=BooleanField()),
+                is_in_shopping_cart=Value(False, output_field=BooleanField())
+            )
+
+        is_favorited = Favorite.objects.filter(
+            recipe=OuterRef('pk'),
+            user=user
+        )
+        is_in_shopping_cart = Purchase.objects.filter(
+            recipe=OuterRef('pk'),
+            user=user
+        )
+        return self.annotate(
+            is_favorited=Exists(is_favorited),
+            is_in_shopping_cart=Exists(is_in_shopping_cart)
+        )
+
+
+class RecipeManager(models.Manager):
+    def get_queryset(self):
+        return RecipeQuerySet(self.model, using=self._db)
+
+    def annotate_flags(self, user):
+        return self.get_queryset().annotate_flags(user)
 
 
 class Recipe(models.Model):
@@ -49,13 +87,19 @@ class Recipe(models.Model):
     text = models.TextField('Описание')
     cooking_time = models.PositiveIntegerField(
         'Время приготовления в минутах',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(
+            1, 'Время приготовления должно быть не менее минуты.'
+        )]
     )
+    objects = RecipeManager()
 
     class Meta:
         verbose_name = 'Рецепты'
         verbose_name_plural = 'Рецепты'
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 class RecipeIngredient(models.Model):
@@ -73,7 +117,9 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveIntegerField(
         'Количество',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(
+            1, 'Колличество ингредиента должно быть не менее еденицы.'
+        )]
     )
 
     class Meta:

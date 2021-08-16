@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from users.serializers import CustomUserSerializer
 
-from .models import Ingredient, Recipe, RecipeIngredient, Tag
+from .models import Ingredient, Recipe, RecipeIngredient, Tag, User
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -70,6 +70,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return self.create(validated_data)
 
     def to_representation(self, instance):
+        user = self.context['request'].user
+        instance = Recipe.objects.annotate_flags(user).get(id=instance.id)
+
         read_serializer = RecipeGetSerializer()
         read_serializer.context['request'] = self.context['request']
         return read_serializer.to_representation(instance)
@@ -80,8 +83,8 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = CustomUserSerializer()
 
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField()
+    is_in_shopping_cart = serializers.BooleanField()
 
     class Meta:
         model = Recipe
@@ -105,17 +108,3 @@ class RecipeGetSerializer(serializers.ModelSerializer):
                 }
             )
         return res
-
-    def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        return (
-            not user.is_anonymous
-            and obj.favorite_recipe.filter(user=user).exists()
-        )
-
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context['request'].user
-        return (
-            not user.is_anonymous
-            and obj.shopping_cart.filter(user=user).exists()
-        )

@@ -37,7 +37,7 @@ class TestGetRecipe(SetAllRecipesData):
 
     def test_filter_recipes(self):
         recipes = self.get_recipes_with_tags(Recipe.objects, ['soup'])
-        self.assert_filter_recipes('?soup', recipes)
+        self.assert_filter_recipes('?tags=soup', recipes)
 
         recipes = self.get_recipes_with_author(Recipe.objects, 1)
         self.assert_filter_recipes('?author=1', recipes)
@@ -55,7 +55,6 @@ class TestGetRecipe(SetAllRecipesData):
         response_data = self.convert_recipes_queryset_to_dict(correct_queryset)
 
         response = self.guest_client.get(f'/api/recipes/{url}')
-        print('<<<<<', response.data)
 
         self.assert_recipes_response(
             response=response,

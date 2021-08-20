@@ -1,14 +1,13 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
-from django.db.models.expressions import Exists, OuterRef
 from django.db.models import BooleanField, Value
-from django.contrib.auth.models import UserManager
+from django.db.models.expressions import Exists, OuterRef
 
 
 class CustomUserQuerySet(models.QuerySet):
     def annotate_flags(self, user):
         if user.is_anonymous:
-            return User.objects.annotate(
+            return self.annotate(
                 is_subscribed=Value(False, output_field=BooleanField())
             )
 
@@ -40,6 +39,9 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('username',)
+
+    def __str__(self):
+        return self.email
 
 
 class Follow(models.Model):

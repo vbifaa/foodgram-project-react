@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserSerializer
-from recipes.models import Recipe
-from rest_framework import serializers
 from django.db.models.query import QuerySet
+from djoser.serializers import UserSerializer
+from rest_framework import serializers
+
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -43,10 +44,9 @@ class SimpleRecipeSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         queryset = self.context['queryset']
 
-
         if self.context['request'].method == 'GET':
             self.create_validate(user=user, recipe=recipe, queryset=queryset)
-        if self.context['request'].method == 'DELETE':
+        else:
             self.delete_validate(user=user, recipe=recipe, queryset=queryset)
         return recipe
 

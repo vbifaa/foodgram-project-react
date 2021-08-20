@@ -1,6 +1,8 @@
-from django.test import TestCase
-from typing import List
 import copy
+from typing import List
+
+from django.test import TestCase
+
 
 class Assertions(TestCase):
     

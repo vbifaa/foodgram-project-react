@@ -1,4 +1,4 @@
-from recipes.models import Tag, Ingredient
+from recipes.models import Ingredient, Tag
 
 
 def create_objects(creator, objects):

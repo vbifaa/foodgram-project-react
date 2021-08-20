@@ -32,7 +32,9 @@ class RecipeAdmin(admin.ModelAdmin):
     ]
 
     def get_tags(self, obj):
-        return "\n".join([tag.name for tag in obj.tags.all()])
+        return ', '.join([tag.name for tag in obj.tags.all()])
+
+    get_tags.short_description = 'Теги'
 
 
 class RecipeIngredientAdmin(admin.ModelAdmin):

@@ -2,14 +2,15 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
+
+from grocery_assistant.actions import create_or_delete_obj_use_func
 from users.pagination import UsersPagination
 from users.serializers import SimpleRecipeSerializer
 
-from .filters import RecipeFilter, IngredientFilter
+from .filters import IngredientFilter, RecipeFilter
 from .models import Favorite, Ingredient, Purchase, Recipe, Tag
 from .permissions import AuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
@@ -92,14 +93,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'error_msg_delete': error_msg_delete
             }
         )
-        serializer.is_valid(raise_exception=True)
-
-        if request.method == 'DELETE':
-            queryset.filter(user=self.request.user, recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        queryset.create(user=self.request.user, recipe=recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return create_or_delete_obj_use_func(
+            is_delete=(request.method == 'DELETE'),
+            serializer=serializer,
+            func={
+                'create': queryset.create,
+                'delete': queryset.filter(
+                    user=self.request.user, recipe=recipe
+                ).delete
+            },
+            args={
+                'create': {'recipe': recipe, 'user': self.request.user},
+                'delete': {}
+            },
+            msg_errors={
+                'create': error_msg_create,
+                'delete': error_msg_delete
+            }
+        )
 
     @action(['get'], detail=False)
     def download_shopping_cart(self, request, *args, **kwargs):
@@ -109,11 +120,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             amounts__recipe__shopping_cart__user=cur_user
         ).order_by('name').annotate(amount=Sum('amounts__amount'))
 
-        content = ''
+        content = []
         for ingredient in ingredients:
             m_u = ingredient.measurement_unit
             amount = ingredient.amount
             name = ingredient.name
-            content += f'{name} ({m_u}) - {amount}\r\n'
+            content.append(f'{name} ({m_u}) - {amount}')
 
-        return HttpResponse(content, content_type='text/plain')
+        return HttpResponse('\r\n'.join(content), content_type='text/plain')

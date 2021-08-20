@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.expressions import Exists, OuterRef
 from django.db.models import BooleanField, Value
+from django.db.models.expressions import Exists, OuterRef
 
 User = get_user_model()
 
@@ -37,7 +37,7 @@ class Tag(models.Model):
 class RecipeQuerySet(models.QuerySet):
     def annotate_flags(self, user):
         if user.is_anonymous:
-            return Recipe.objects.annotate(
+            return self.annotate(
                 is_favorited=Value(False, output_field=BooleanField()),
                 is_in_shopping_cart=Value(False, output_field=BooleanField())
             )
@@ -94,7 +94,7 @@ class Recipe(models.Model):
     objects = RecipeManager()
 
     class Meta:
-        verbose_name = 'Рецепты'
+        verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('name',)
 
@@ -118,7 +118,7 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveIntegerField(
         'Количество',
         validators=[MinValueValidator(
-            1, 'Колличество ингредиента должно быть не менее еденицы.'
+            1, 'Количество ингредиента должно быть не менее единицы.'
         )]
     )
 

@@ -1,9 +1,11 @@
+import copy
+
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from .data import Data
-from .assertions import Assertions
+
 from . import objects_creator
-import copy
+from .assertions import Assertions
+from .data import Data
 
 
 def authentication(client, client_auth_data):

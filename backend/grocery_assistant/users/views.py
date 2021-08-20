@@ -5,6 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from grocery_assistant.actions import create_or_delete_obj_use_func
+
 from .models import Follow
 from .pagination import UsersPagination
 from .serializers import FollowingUsersSerializer
@@ -31,15 +33,12 @@ class CustomUserViewSet(UserViewSet):
         following = self.get_queryset().filter(following__user=request.user)
 
         page = self.paginate_queryset(following)
-        if page is not None:
-            serializer = FollowingUsersSerializer(
-                page, context={'request': request}, many=True
+        serializer = FollowingUsersSerializer(
+                page or following, context={'request': request}, many=True
             )
+        if page is not None:
             return self.get_paginated_response(serializer.data)
 
-        serializer = FollowingUsersSerializer(
-            following, context={'request': request}, many=True
-        )
         return Response(serializer.data)
 
     @action(['get', 'delete'], detail=True)
@@ -47,13 +46,23 @@ class CustomUserViewSet(UserViewSet):
         serializer = FollowingUsersSerializer(
             data=self.kwargs['id'], context={'request': request}
         )
-        serializer.is_valid(raise_exception=True)
-
         author = get_object_or_404(User, id=self.kwargs['id'])
 
-        if request.method == 'DELETE':
-            author.following.filter(user=self.request.user).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        Follow.objects.create(author=author, user=self.request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return create_or_delete_obj_use_func(
+            is_delete=(request.method == 'DELETE'),
+            serializer=serializer,
+            func={
+                'create': Follow.objects.create,
+                'delete': author.following.filter(
+                    user=self.request.user
+                ).delete
+            },
+            args={
+                'create': {'author': author, 'user': self.request.user},
+                'delete': {}
+            },
+            msg_errors={
+                'create': 'Не получилось подписаться на пользователя.',
+                'delete': 'Не получилось отписаться от пользователя.'
+            }
+        )

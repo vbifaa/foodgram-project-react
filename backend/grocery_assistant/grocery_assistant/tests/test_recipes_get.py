@@ -1,6 +1,8 @@
 import copy
-from .data.set_data import SetAllRecipesData
+
 from recipes.models import Recipe
+
+from .data.set_data import SetAllRecipesData
 
 
 class TestGetRecipe(SetAllRecipesData):

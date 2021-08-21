@@ -82,10 +82,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create_delete_relation(
         self, request, queryset, error_msg_create, error_msg_delete
     ):
-        recipe = get_object_or_404(Recipe, id=self.kwargs['pk'])
+        recipe_id=self.kwargs['pk']
 
         serializer = SimpleRecipeSerializer(
-            data=self.kwargs['pk'],
+            data=recipe_id,
             context={
                 'request': request,
                 'queryset': queryset,
@@ -99,11 +99,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             func={
                 'create': queryset.create,
                 'delete': queryset.filter(
-                    user=self.request.user, recipe=recipe
+                    user=self.request.user, recipe_id=recipe_id
                 ).delete
             },
             args={
-                'create': {'recipe': recipe, 'user': self.request.user},
+                'create': {'recipe_id': recipe_id, 'user': self.request.user},
                 'delete': {}
             },
             msg_errors={

@@ -82,7 +82,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create_delete_relation(
         self, request, queryset, error_msg_create, error_msg_delete
     ):
-        recipe_id=self.kwargs['pk']
+        recipe_id = self.kwargs['pk']
 
         serializer = SimpleRecipeSerializer(
             data=recipe_id,
@@ -93,23 +93,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'error_msg_delete': error_msg_delete
             }
         )
-        return create_or_delete_obj_use_func(
-            is_delete=(request.method == 'DELETE'),
-            serializer=serializer,
-            func={
-                'create': queryset.create,
-                'delete': queryset.filter(
+        if request.method == 'DELETE':
+            return create_or_delete_obj_use_func(
+                is_delete=True,
+                serializer=serializer,
+                func=queryset.filter(
                     user=self.request.user, recipe_id=recipe_id
-                ).delete
-            },
-            args={
-                'create': {'recipe_id': recipe_id, 'user': self.request.user},
-                'delete': {}
-            },
-            msg_errors={
-                'create': error_msg_create,
-                'delete': error_msg_delete
-            }
+                ).delete,
+                args={},
+                msg_error=error_msg_delete
+            )
+        return create_or_delete_obj_use_func(
+            is_delete=False,
+            serializer=serializer,
+            func=queryset.create,
+            args={'recipe_id': recipe_id, 'user': self.request.user},
+            msg_error=error_msg_create
         )
 
     @action(['get'], detail=False)

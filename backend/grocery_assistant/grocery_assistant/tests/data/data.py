@@ -107,7 +107,7 @@ class Data:
             'cooking_time': 20
         },
         {
-            "ingredients": [
+            'ingredients': [
                 {'id': 9,'amount': 80},
                 {'id': 6,'amount': 10},
                 {'id': 8,'amount': 3}

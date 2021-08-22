@@ -2,34 +2,28 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-def try_action(func, args, mssg_error):
+def try_action(func, args, msg_error):
     try:
         func(**args)
     except Exception:
         return Response(
-            data=mssg_error,
+            data=msg_error,
             status=status.HTTP_400_BAD_REQUEST
         )
 
 
 def create_or_delete_obj_use_func(
-    is_delete, serializer, func, args, msg_errors
+    is_delete, serializer, func, args, msg_error
 ):
     serializer.is_valid(raise_exception=True)
 
     if is_delete:
-        res = try_action(
-            func=func['delete'], args=args['delete'], mssg_error=['delete']
-        )
+        res = try_action(func=func, args=args, msg_error=msg_error)
         if res is not None:
             return res
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    res = try_action(
-        func=func['create'],
-        args=args['create'],
-        mssg_error=msg_errors['create']
-    )
+    res = try_action(func=func, args=args, msg_error=msg_error)
     if res is not None:
         return res
 

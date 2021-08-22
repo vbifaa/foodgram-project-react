@@ -48,21 +48,20 @@ class CustomUserViewSet(UserViewSet):
         )
         author = get_object_or_404(User, id=self.kwargs['id'])
 
-        return create_or_delete_obj_use_func(
-            is_delete=(request.method == 'DELETE'),
-            serializer=serializer,
-            func={
-                'create': Follow.objects.create,
-                'delete': author.following.filter(
+        if request.method == 'DELETE':
+            return create_or_delete_obj_use_func(
+                is_delete=True,
+                serializer=serializer,
+                func=author.following.filter(
                     user=self.request.user
-                ).delete
-            },
-            args={
-                'create': {'author': author, 'user': self.request.user},
-                'delete': {}
-            },
-            msg_errors={
-                'create': 'Не получилось подписаться на пользователя.',
-                'delete': 'Не получилось отписаться от пользователя.'
-            }
+                ).delete,
+                args={},
+                msg_error='Не получилось отписаться от пользователя.'
+            )
+        return create_or_delete_obj_use_func(
+            is_delete=False,
+            serializer=serializer,
+            func=Follow.objects.create,
+            args={'author': author, 'user': self.request.user},
+            msg_error='Не получилось подписаться на пользователя.'
         )

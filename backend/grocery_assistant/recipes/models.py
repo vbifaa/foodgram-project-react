@@ -56,14 +56,6 @@ class RecipeQuerySet(models.QuerySet):
         )
 
 
-class RecipeManager(models.Manager):
-    def get_queryset(self):
-        return RecipeQuerySet(self.model, using=self._db)
-
-    def annotate_flags(self, user):
-        return self.get_queryset().annotate_flags(user)
-
-
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -72,7 +64,7 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     name = models.CharField('Название', max_length=200)
-    image = models.ImageField("Фото блюда", upload_to='recipes')
+    image = models.ImageField('Фото блюда', upload_to='recipes')
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиент',
@@ -91,7 +83,7 @@ class Recipe(models.Model):
             1, 'Время приготовления должно быть не менее минуты.'
         )]
     )
-    objects = RecipeManager()
+    objects = RecipeQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Рецепт'

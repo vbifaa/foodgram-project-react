@@ -17,14 +17,11 @@ def create_or_delete_obj_use_func(
 ):
     serializer.is_valid(raise_exception=True)
 
-    if is_delete:
-        res = try_action(func=func, args=args, msg_error=msg_error)
-        if res is not None:
-            return res
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     res = try_action(func=func, args=args, msg_error=msg_error)
     if res is not None:
         return res
+
+    if is_delete:
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)
